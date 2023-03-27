@@ -1,0 +1,64 @@
+﻿@page "/products/create"
+@using Microsoft.AspNetCore.Components
+@using BlazingMudShop.Models
+@using Microsoft.EntityFrameworkCore
+@using BlazingMudShop.Data
+@inject AppDbContext Context;
+@inject NavigationManager NavManager
+
+<h1>New Product</h1>
+
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator/>
+    <MudGrid>
+        <MudItem xs="6" sm="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Title" HelperText="Product Title" class="mb-4"
+                                  @bind-Value="model.Title" For="@(() => model.Title)"/>
+
+                    <MudNumericField Label="Price" HelperText="Product Price" class="mb-4"
+                                     @bind-Value="model.Price" For="@(() => model.Price)"/>
+
+                    <MudSelect T="int" Label="Category" @bind-Value="model.CategoryId" HelperText="Category">
+                        @foreach (var item in categories)
+                        {
+                            <MudSelectItem T="int" Value="@item.Id">@item.Title</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudText Typo="Typo.body2" Align="Align.Center">
+                Fill out the form correctly to see the success message.
+            </MudText>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+@code {
+    private Product model = new();
+    private List<Category> categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await Context.Categories.AsNoTracking().OrderBy(x => x.Title).ToListAsync();
+        model.CategoryId = categories[0].Id;
+    }
+
+    private async Task OnValidSubmit(EditContext context)
+    {
+        StateHasChanged();
+
+        await Context.Products.AddAsync(model);
+        await Context.SaveChangesAsync();
+        NavManager.NavigateTo("/products");
+    }
+
+}

@@ -1,0 +1,37 @@
+﻿@page "/products"
+@using BlazingMudShop.Models
+@using Microsoft.EntityFrameworkCore
+@using BlazingMudShop.Data
+@inject AppDbContext Context;
+
+<h1>Products</h1>
+
+<MudButton Href="/products/create" Variant="Variant.Filled" StartIcon="@Icons.Material.TwoTone.Add" Color="Color.Info" Size="Size.Small">New Product</MudButton>
+
+<MudDataGrid Items="@products">
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Title="#"/>
+        <PropertyColumn Property="x => x.Title"/>
+        <PropertyColumn Property='x => x.Price.ToString("C")'/>
+        <TemplateColumn CellClass="d-flex justify-center">
+            <CellTemplate>
+                <MudStack Row>
+                    @{
+                        var url = $"/products/edit/{context.Item.Id}";
+                    }
+                    <MudButton Href="@url" Size="@Size.Small" Variant="@Variant.Filled" Color="@Color.Primary">Edit</MudButton>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private List<Product> products = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Context.Products.AsNoTracking().ToListAsync();
+    }
+
+}
